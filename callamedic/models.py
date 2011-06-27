@@ -31,12 +31,18 @@ class Incident(models.Model):
 	status = models.CharField(max_length=6, choices=INCIDENT_STATUS_CHOICES)
 	responders = models.ManyToManyField(Responder, through='IncidentResponder')
 	
+	def __unicode__(self):
+	        return u"%i" % self.id
+	
 class ResponderLocation(models.Model):
 	geometry = models.PointField()  #srid = 4326   - EPSG number
 	timestamp = models.DateTimeField()
 	responder = models.ForeignKey(Responder)
 
 	objects = models.GeoManager()
+	
+	def __unicode__(self):
+	        return u'%s %s' % (self.responder.username, self.timestamp)
 
 class IncidentLocation(models.Model):
 	geometry = models.PointField()  #srid = 4326   - EPSG number
@@ -46,11 +52,17 @@ class IncidentLocation(models.Model):
 	
 	objects = models.GeoManager()
 	
+	def __unicode__(self):
+	        return u'%s %s' % (self.incident.id, self.timestamp)
+	
 class IncidentResponder(models.Model):
 	responder = models.ForeignKey(Responder)
 	incident = models.ForeignKey(Incident)
 	status = models.CharField(max_length=10, choices=RESPONDER_STATUS_CHOICES)
 	contacted_at = models.DateTimeField(null=True)
 	# include other important times to capture in this class
+	
+	def __unicode__(self):
+	        return u'%s %s' % (self.incident.id, self.responder.username)
 	
 	
