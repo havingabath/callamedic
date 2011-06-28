@@ -27,33 +27,31 @@ class Responder(User):
 	on_call = models.BooleanField(default=False)
 	certificate_valid_to = models.DateTimeField()
 		
-class Incident(models.Model):
+
+class Location(models.Model):
+	geometry = models.PointField()  #srid = 4326   - EPSG number
+	timestamp = models.DateTimeField()
+
+	objects = models.GeoManager()
+
+	class Meta:
+		abstract = True
+
+
+class Incident(Location):
 	status = models.CharField(max_length=6, choices=INCIDENT_STATUS_CHOICES)
 	responders = models.ManyToManyField(Responder, through='IncidentResponder')
-	
+
 	def __unicode__(self):
-	        return u"%i" % self.id
-	
-class ResponderLocation(models.Model):
-	geometry = models.PointField()  #srid = 4326   - EPSG number
-	timestamp = models.DateTimeField()
+		return u'%s %s' % (self.id, self.timestamp)
+
+
+class ResponderLocation(Location):
 	responder = models.ForeignKey(Responder)
 
-	objects = models.GeoManager()
-	
 	def __unicode__(self):
-	        return u'%s %s' % (self.responder.username, self.timestamp)
+		return u'%s %s' % (self.responder.username, self.timestamp)
 
-class IncidentLocation(models.Model):
-	geometry = models.PointField()  #srid = 4326   - EPSG number
-	timestamp = models.DateTimeField()
-	incident = models.ForeignKey(Incident)
-	#need to include field(s) to save address
-	
-	objects = models.GeoManager()
-	
-	def __unicode__(self):
-	        return u'%s %s' % (self.incident.id, self.timestamp)
 	
 class IncidentResponder(models.Model):
 	responder = models.ForeignKey(Responder)
