@@ -12,12 +12,13 @@ INCIDENT_STATUS_CHOICES = (
 	)
 
 RESPONDER_STATUS_CHOICES = (
-	('alerted', 'Alerted'),
 	('pending', 'Pending'),
+	('recieved', 'Recieved'),
 	('rejected', 'Rejected'),
 	('en_route', 'En_route'),
 	('cancelled', 'Cancelled'),
-	('at_scene', 'At_scene'),	
+	('at_scene', 'At_scene'),
+	('finished', 'Finished')	
 )
 
 	

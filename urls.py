@@ -7,6 +7,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 	(r'^$', main_page),
+	(r'^api/', include('medic.api.urls')),
     # Examples:
     # url(r'^$', 'medic.views.home', name='home'),
     # url(r'^medic/', include('medic.foo.urls')),
