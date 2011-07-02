@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
+from django.contrib.gis.geos import Point
 
 # Create your models here.
 
@@ -26,12 +27,13 @@ class Responder(User):
 	organization = models.TextField(blank=True)
 	android_id = models.IntegerField(unique=True)
 	on_call = models.BooleanField(default=False)
-	certificate_valid_to = models.DateTimeField()
+	cert_valid_to = models.DateTimeField(null=True)
 		
 
 class Location(models.Model):
 	geometry = models.PointField()  #srid = 4326   - EPSG number
 	timestamp = models.DateTimeField()
+	address = models.CharField(max_length=300, null=True)
 
 	objects = models.GeoManager()
 

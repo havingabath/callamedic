@@ -1,12 +1,16 @@
+import datetime
+
 from piston.handler import BaseHandler
 from callamedic.models import Incident
+from piston.utils import rc
+from callamedic.models import *
 
 class IncidentHandler(BaseHandler):
 	allowed_methods = ('GET','POST','PUT')
 	
-	def read(self, request, id=None, android_id=None):
-		if id:
-			return Incident.objects.get(pk=id)
+	def read(self, request, incident_id=None, android_id=None):
+		if incident_id:
+			return Incident.objects.get(pk=incident_id)
 		else:
 			return 0
 		
@@ -27,31 +31,40 @@ class IncidentHandler(BaseHandler):
 class ResponderHandler(BaseHandler):
 	allowed_methods = ('POST','PUT',)
 	
+	model = Responder
+	
 	def create(self, request):
 		data = request.data
-		return "user with the following details has been created: %s" % data
+		responder = self.model(android_id=data["android_id"], username=data["username"], first_name=data.get("firstname", None), last_name=data.get("lastname", None), email=data["email"], organization=data.get("organization", None) )
+		responder.save()
+		return responder
 	
 	def update(self, request, android_id = None):
+		responder = Responder.objects.get(android_id=android_id)
 		data = request.data
-		
 		if data["on_call"] == "True":
-			response = "%s is logged in" % android_id
+			responder.on_call = True
 		elif data["on_call"] == "False":
-			response = "%s is logged out" % android_id
-		else:
-			response = 0
+			responder.on_call = False
 		
-		return response
+		responder.save()
+		
+		return responder
 		
 class ResponderLocationHandler(BaseHandler):
 	allowed_methods = ('POST',)
 	
+	model = ResponderLocation
+	
 	def create(self, request):
 		data = request.data
 		
-		response = "%s is at location %s , %s" % (data["android_id"],data["lat"],data["lon"])
+		geometry = Point(float(data["lat"]),float(data["lon"]))
+		responder_location = self.model(timestamp=datetime.datetime.now(), geometry=geometry)
+		responder_location.responder = Responder.objects.get(android_id=data["android_id"])
+		responder_location.save()
 		
-		return response
+		return responder_location
 		
 class IncidentResponderHandler(BaseHandler):
 	allowed_methods = ('PUT',)
