@@ -17,6 +17,7 @@ incidentresponder_handler = CsrfExemptResource(IncidentResponderHandler)
 urlpatterns = patterns('',
     url(r'^incident/(?P<incident_id>[^/]+)/(?P<android_id>[^/]+)/', incident_handler),
 	url(r'^incident/$', incident_handler),
+	url(r'^incident/(?P<incident_id>[^/]+)/', incident_handler),
 	url(r'^responder/(?P<android_id>[^/]+)/', responder_handler),
 	url(r'^responder/$', responder_handler),
 	url(r'^responder_location/$', responderlocation_handler),

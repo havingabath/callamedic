@@ -8,39 +8,57 @@ from callamedic.models import *
 class IncidentHandler(BaseHandler):
 	allowed_methods = ('GET','POST','PUT')
 	
+	model = Incident
+	
+	#Responder retrieves incident
 	def read(self, request, incident_id=None, android_id=None):
 		if incident_id:
 			return Incident.objects.get(pk=incident_id)
 		else:
 			return 0
-		
+	
+	#999 creates incident
 	def create(self, request):
 		data = request.data
-		return data
 		
-	def update(self, request, id=None):
+		point = Point(float(data["lat"]),float(data["lon"]))
+		incident = self.model(timestamp=datetime.datetime.now(), point=point, address=data.get("address", None), status= data.get("status", "open"))
+		#start incident response process here
+		incident.save() 
+		
+		response = rc.CREATED
+		response.content = {"id":str(incident.id)}
+		return response
+	
+	#999 updates with new info on incident	
+	def update(self, request, incident_id=None):
 		data = request.data
 		
-		if data["status"] == "closed":
-			return "Incident %s is closed" % id
-		elif data["status"] == "open":
-			return "Incident %s is open" % id
-		else:
-			return 0
+		incident = Incident.objects.get(id=incident_id)
+		incident.status = data["status"]
+		
+		incident.save()
+		
+		return incident
 		
 class ResponderHandler(BaseHandler):
 	allowed_methods = ('POST','PUT',)
 	
 	model = Responder
 	
+	#Responder Registration
 	def create(self, request):
 		data = request.data
-		responder = self.model(android_id=data["android_id"], username=data["username"], first_name=data.get("firstname", None), last_name=data.get("lastname", None), email=data["email"], organization=data.get("organization", None) )
+		phone=Phone(android_id=data["android_id"])
+		phone.save()
+		responder = self.model(phone=phone, username=data["username"], first_name=data.get("firstname", None), last_name=data.get("lastname", None), email=data["email"], organization=data.get("organization", None) )
 		responder.save()
+		
 		return responder
 	
+	#Responder login/logout
 	def update(self, request, android_id = None):
-		responder = Responder.objects.get(android_id=android_id)
+		responder = Responder.objects.get(phone=android_id)
 		data = request.data
 		if data["on_call"] == "True":
 			responder.on_call = True
@@ -56,12 +74,13 @@ class ResponderLocationHandler(BaseHandler):
 	
 	model = ResponderLocation
 	
+	#Responder sends in their location
 	def create(self, request):
 		data = request.data
 		
-		geometry = Point(float(data["lat"]),float(data["lon"]))
-		responder_location = self.model(timestamp=datetime.datetime.now(), geometry=geometry)
-		responder_location.responder = Responder.objects.get(android_id=data["android_id"])
+		point = Point(float(data["lat"]),float(data["lon"]))
+		responder_location = self.model(timestamp=datetime.datetime.now(), point=point)
+		responder_location.responder = Responder.objects.get(phone=data["android_id"])
 		responder_location.save()
 		
 		return responder_location
@@ -69,6 +88,7 @@ class ResponderLocationHandler(BaseHandler):
 class IncidentResponderHandler(BaseHandler):
 	allowed_methods = ('PUT',)
 	
+	#Responder updates their status on a response
 	def update(self, request, incident_id = None, android_id = None):
 		data = request.data
 		

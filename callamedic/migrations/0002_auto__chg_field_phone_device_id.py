@@ -8,71 +8,14 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding model 'Phone'
-        db.create_table('callamedic_phone', (
-            ('android_id', self.gf('django.db.models.fields.CharField')(max_length=16, primary_key=True)),
-            ('device_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
-        ))
-        db.send_create_signal('callamedic', ['Phone'])
-
-        # Adding model 'Responder'
-        db.create_table('callamedic_responder', (
-            ('user_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('phone', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['callamedic.Phone'], unique=True, primary_key=True)),
-            ('organization', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('on_call', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('cert_valid_to', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('verified', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('callamedic', ['Responder'])
-
-        # Adding model 'Incident'
-        db.create_table('callamedic_incident', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('point', self.gf('django.contrib.gis.db.models.fields.PointField')()),
-            ('timestamp', self.gf('django.db.models.fields.DateTimeField')()),
-            ('address', self.gf('django.db.models.fields.CharField')(max_length=300, null=True)),
-            ('status', self.gf('django.db.models.fields.CharField')(max_length=6)),
-        ))
-        db.send_create_signal('callamedic', ['Incident'])
-
-        # Adding model 'ResponderLocation'
-        db.create_table('callamedic_responderlocation', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('point', self.gf('django.contrib.gis.db.models.fields.PointField')()),
-            ('timestamp', self.gf('django.db.models.fields.DateTimeField')()),
-            ('address', self.gf('django.db.models.fields.CharField')(max_length=300, null=True)),
-            ('responder', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['callamedic.Responder'])),
-        ))
-        db.send_create_signal('callamedic', ['ResponderLocation'])
-
-        # Adding model 'IncidentResponder'
-        db.create_table('callamedic_incidentresponder', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('responder', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['callamedic.Responder'])),
-            ('incident', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['callamedic.Incident'])),
-            ('status', self.gf('django.db.models.fields.CharField')(max_length=10)),
-            ('contacted_at', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-        ))
-        db.send_create_signal('callamedic', ['IncidentResponder'])
+        # Changing field 'Phone.device_id'
+        db.alter_column('callamedic_phone', 'device_id', self.gf('django.db.models.fields.CharField')(max_length=255, unique=True, null=True))
 
 
     def backwards(self, orm):
         
-        # Deleting model 'Phone'
-        db.delete_table('callamedic_phone')
-
-        # Deleting model 'Responder'
-        db.delete_table('callamedic_responder')
-
-        # Deleting model 'Incident'
-        db.delete_table('callamedic_incident')
-
-        # Deleting model 'ResponderLocation'
-        db.delete_table('callamedic_responderlocation')
-
-        # Deleting model 'IncidentResponder'
-        db.delete_table('callamedic_incidentresponder')
+        # Changing field 'Phone.device_id'
+        db.alter_column('callamedic_phone', 'device_id', self.gf('django.db.models.fields.CharField')(default='default01', max_length=255, unique=True))
 
 
     models = {
@@ -125,7 +68,7 @@ class Migration(SchemaMigration):
         'callamedic.phone': {
             'Meta': {'object_name': 'Phone'},
             'android_id': ('django.db.models.fields.CharField', [], {'max_length': '16', 'primary_key': 'True'}),
-            'device_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
+            'device_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'unique': 'True', 'null': 'True'})
         },
         'callamedic.responder': {
             'Meta': {'object_name': 'Responder', '_ormbases': ['auth.User']},
