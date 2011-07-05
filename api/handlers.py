@@ -23,8 +23,8 @@ class IncidentHandler(BaseHandler):
 		
 		point = Point(float(data["lat"]),float(data["lon"]))
 		incident = self.model(timestamp=datetime.datetime.now(), point=point, address=data.get("address", None), status= data.get("status", "open"))
-		#start incident response process here
-		incident.save() 
+		incident.save()
+		#start incident response process here 
 		
 		response = rc.CREATED
 		response.content = {"id":str(incident.id)}
