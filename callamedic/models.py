@@ -64,7 +64,7 @@ class Incident(Location):
 	
 		
 	def create_incident_responders(self):
-		eligible_locations = ResponderLocation.objects.filter(responder__on_call=True,latest=True).filter(point__distance_lte=(inc.point,D(km=10))).distance(inc.point).order_by('distance')
+		eligible_locations = ResponderLocation.objects.filter(responder__on_call=True,latest=True).filter(point__distance_lte=(self.point,D(km=10))).distance(self.point).order_by('distance')
 		incident_responders = []
 		for el in eligible_locations:
 			ir = IncidentResponder(responder=el.responder,incident=self,status='standby')

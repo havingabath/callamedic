@@ -26,7 +26,7 @@ class IncidentHandler(BaseHandler):
 		incident = self.model(timestamp=datetime.datetime.now(), point=point, address=data.get("address", None), status= data.get("status", "open"))
 		incident.save()
 		#start incident response process here
-		#manage_incident(incident) 
+		manage_incident(incident) 
 		
 		response = rc.CREATED
 		response.content = {"id":str(incident.id)}
