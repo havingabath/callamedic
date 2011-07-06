@@ -4,6 +4,7 @@ from piston.handler import BaseHandler
 from callamedic.models import Incident
 from piston.utils import rc
 from callamedic.models import *
+from callamedic.views import manage_incident
 
 class IncidentHandler(BaseHandler):
 	allowed_methods = ('GET','POST','PUT')
@@ -24,7 +25,8 @@ class IncidentHandler(BaseHandler):
 		point = Point(float(data["lat"]),float(data["lon"]))
 		incident = self.model(timestamp=datetime.datetime.now(), point=point, address=data.get("address", None), status= data.get("status", "open"))
 		incident.save()
-		#start incident response process here 
+		#start incident response process here
+		#manage_incident(incident) 
 		
 		response = rc.CREATED
 		response.content = {"id":str(incident.id)}
