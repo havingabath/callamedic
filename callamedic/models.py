@@ -43,8 +43,7 @@ class Responder(User):
 		if len(loc_set) > 0:
 			location = loc_set[0]
 		return location
-		
-
+	
 class Location(models.Model):
 	point = models.PointField()  #srid = 4326   - EPSG number
 	timestamp = models.DateTimeField()
@@ -63,24 +62,12 @@ class Incident(Location):
 	def __unicode__(self):
 		return u'%s %s' % (self.id, self.timestamp)
 	
-	#not finished	
+		
 	def create_incident_responders(self):
-		""""on_call_responders = Responder.objects.filter(on_call=True)
-		on_call_locations = []
-		
-		for r in on_call_responders:
-			on_call_locations.append(r.get_most_recent_location)
-		
-		eligible_locations = on_call_locations.filter(point__distance_lte=(self.point,D(km=10))).distance(self.point).order_by('distance')
-		eligible_responders = []
-		
-		for l in eligible_locations:
-			eligible_responders.append(l.responder)"""
-		#rls = ResponderLocation.objects.filter(point__distance_lte=(self.point,D(km=10))).distance(self.point).order_by('distance')
-		responders = Responder.objects.all()[:5]     #dummy return
+		eligible_locations = ResponderLocation.objects.filter(responder__on_call=True,latest=True).filter(point__distance_lte=(inc.point,D(km=10))).distance(inc.point).order_by('distance')
 		incident_responders = []
-		for r in responders:
-			ir = IncidentResponder(responder=r,incident=self,status='standby')
+		for el in eligible_locations:
+			ir = IncidentResponder(responder=el.responder,incident=self,status='standby')
 			ir.save()
 			incident_responders.append(ir)
 		return incident_responders
@@ -105,9 +92,19 @@ class Incident(Location):
 
 class ResponderLocation(Location):
 	responder = models.ForeignKey(Responder)
+	latest = models.BooleanField() # dirty solution
 
 	def __unicode__(self):
 		return u'%s %s' % (self.responder.username, self.timestamp)
+		
+	#ensures there is only ever one latest location per Responder
+	def save(self, *args, **kwargs):
+		previous_latest_location = ResponderLocation.objects.filter(responder=self.responder, latest=True)
+		if previous_latest_location:
+			previous_latest_location.update(latest=False)
+		self.latest = True
+		super(ResponderLocation, self).save(*args, **kwargs)
+
 
 	
 class IncidentResponder(models.Model):
