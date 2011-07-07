@@ -5,7 +5,7 @@ from callamedic.models import *
 import time
 import threading
 
-#this loop will repeat at set intervals
+#This loop will repeat at set intervals
 def repeat(event_timer, incident_id, interval, alert):
 	while True:
 		incident = Incident.objects.get(id=incident_id)
@@ -14,7 +14,7 @@ def repeat(event_timer, incident_id, interval, alert):
 		alert(incident)
 		event_timer.wait(interval)
 
-#this checks the number of repsonders responding, and if not enough, alerts more standby responders
+#and this checks the number of repsonders responding, and if not enough, alerts more standby responders
 def alert_more_responders(incident):
 	if incident.number_responding() < 3:
 		wave_of_incident_responders = incident.get_standby_responders()
